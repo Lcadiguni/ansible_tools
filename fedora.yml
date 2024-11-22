@@ -1,0 +1,173 @@
+- name: Preparing Workstation
+  hosts: localhost
+  connection: local
+  tasks:
+
+    # Instalar pacotes necessários
+    - name: Installing Linux Apps
+      become: true
+      dnf:
+        name: '{{ item }}'
+        state: present
+      loop:
+          - vim
+          - htop
+          - curl
+          - wget
+          - ncdu
+          - tree
+          - ca-certificates
+          - gnupg
+          - python3-pip
+          - make
+          - git
+          - bash-completion
+          - zsh
+          - flameshot
+          - tilix
+          - krita
+          - jq
+          - mtr
+
+    # Adicionar repositório do VirtualBox
+    - name: Install VirtualBox Repository with disabled GPG check
+      become: true
+      copy:
+        dest: /etc/yum.repos.d/virtualbox.repo
+        content: |
+          [virtualbox]
+          name=Oracle Linux / RHEL / CentOS / Fedora / EPEL $releasever - $basearch
+          baseurl=https://download.virtualbox.org/virtualbox/rpm/fedora/$releasever/$basearch
+          enabled=1
+          gpgcheck=0  # Desabilitando a verificação da chave GPG
+
+    - name: Install VirtualBox (ignore GPG check)
+      become: true
+      dnf:
+        name: VirtualBox
+        state: present
+        disable_gpg_check: yes
+
+    # Instalar outros pacotes
+    - block:
+        - name: Installing Vagrant 2.2.18
+          become: true
+          unarchive:
+            src: 'https://releases.hashicorp.com/vagrant/2.2.18/vagrant_2.2.18_linux_amd64.zip'
+            dest: /usr/local/bin
+            remote_src: yes
+
+    # Instalar Terraform
+    - block:
+      - name: Installing Terraform 0.12.31
+        become: true
+        unarchive:
+          src: 'https://releases.hashicorp.com/terraform/0.12.31/terraform_0.12.31_linux_amd64.zip'
+          dest: /usr/local/bin
+          remote_src: yes
+      - name: Renaming terraform12 binary
+        become: true
+        command: mv /usr/local/bin/terraform /usr/local/bin/terraform12
+      - name: Installing Terraform 0.13.7 
+        become: true
+        unarchive:
+          src: 'https://releases.hashicorp.com/terraform/0.13.7/terraform_0.13.7_linux_amd64.zip'
+          dest: /usr/local/bin
+          remote_src: yes
+      - name: Renaming terraform13 binary
+        become: true
+        command: mv /usr/local/bin/terraform /usr/local/bin/terraform13
+      - name: Installing Terraform 0.14.11
+        become: true
+        unarchive:
+          src: 'https://releases.hashicorp.com/terraform/0.14.11/terraform_0.14.11_linux_amd64.zip'
+          dest: /usr/local/bin
+          remote_src: yes
+      - name: Renaming terraform14 binary
+        become: true
+        command: mv /usr/local/bin/terraform /usr/local/bin/terraform14
+      - name: Installing Terraform 0.15.0
+        become: true
+        unarchive:
+          src: 'https://releases.hashicorp.com/terraform/0.15.5/terraform_0.15.5_linux_amd64.zip'
+          dest: /usr/local/bin
+          remote_src: yes
+      - name: Renaming terraform15 binary
+        become: true
+        command: mv /usr/local/bin/terraform /usr/local/bin/terraform15
+      - name: Installing Terraform 1.0.4
+        become: true
+        unarchive:
+          src: 'https://releases.hashicorp.com/terraform/1.0.4/terraform_1.0.4_linux_amd64.zip'
+          dest: /usr/local/bin
+          remote_src: yes
+      - name: Renaming terraform1 binary
+        become: true
+        command: mv /usr/local/bin/terraform /usr/local/bin/terraform1
+
+    # Adicionar a chave GPG e o repositório para o VSCode
+    - name: Install Microsoft Key for VSCode
+      become: true
+      rpm_key:
+        key: 'https://packages.microsoft.com/keys/microsoft.asc'
+        state: present
+
+    - name: Add VSCode Repository
+      become: true
+      copy:
+        dest: /etc/yum.repos.d/vscode.repo
+        content: |
+          [code]
+          name=Visual Studio Code
+          baseurl=https://packages.microsoft.com/yumrepos/vscode
+          enabled=1
+          gpgcheck=1
+          gpgkey=https://packages.microsoft.com/keys/microsoft.asc
+
+    - name: Install Visual Studio Code
+      become: true
+      dnf:
+        name: code
+        state: present
+
+    - name: Install Visual Studio Code Extensions
+      shell:
+        cmd: code --install-extension '{{ item }}'
+      loop:
+        - ms-python.python
+        - ms-azuretools.vscode-docker
+        - bbenoist.vagrant
+        - hashicorp.terraform
+        - gruntfuggly.todo-tree
+        - njpwerner.autodocstring
+
+    - name: Install dnf-plugins-core
+      become: true
+      dnf:
+        name: dnf-plugins-core
+        state: present
+
+    # Criar arquivo de repositório do Brave
+    - name: Add Brave Browser repository
+      become: true
+      copy:
+        dest: /etc/yum.repos.d/brave-browser.repo
+        content: |
+          [brave]
+          name=Brave Browser
+          baseurl=https://brave-browser-rpm-release.s3.brave.com/x86_64/
+          enabled=1
+          gpgcheck=1
+          gpgkey=https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
+
+    # Importar a chave GPG do Brave
+    - name: Import Brave Browser GPG key
+      become: true
+      command: rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
+
+    # Instalar o Brave Browser
+    - name: Install Brave Browser
+      become: true
+      dnf:
+        name: brave-browser
+        state: present

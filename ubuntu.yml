@@ -25,7 +25,6 @@
           - git
           - bash-completion
           - gnupg-agent
-          - zsh
           - flameshot
           - fonts-hack
           - tilix
@@ -34,36 +33,6 @@
           - jq
           - mtr
 
-    - block:
-      - name: Verify if Oh-My-zsh is installed
-        command: test -d /home/{{ ansible_user_id }}/.oh-my-zsh
-        register: ohmyzsh
-        ignore_errors: true
-      - name: Installing Oh-My-zsh
-        shell:
-          cmd: 'curl -fsL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh | bash'
-          warn: false
-        when: ohmyzsh.rc != 0
-      - name: Changing Default Shell to ZSH
-        become: yes
-        user: 
-          name: '{{ ansible_user_id }}'
-          shell: /bin/zsh 
-      - name: Changing Default ZSH Theme to Agnoster
-        lineinfile:
-          path: /home/{{ ansible_user_id }}/.zshrc
-          regexp: '^ZSH_THEME='
-          line: 'ZSH_THEME="agnoster"'
-      - name: Creating ZSH Completion folder
-        file:
-          path: /home/{{ ansible_user_id }}/.oh-my-zsh/completions
-          state: directory
-          mode: 0755
-      - name: Adding autoload to compinit
-        lineinfile:
-          path: /home/{{ ansible_user_id }}/.zshrc
-          line: 'autoload -U compinit && compinit'
-          state: present
 
     - name: Installing AWS CLI via pip3
       become: true
@@ -133,40 +102,6 @@
           src: 'https://releases.hashicorp.com/vault/1.8.1/vault_1.8.1_linux_amd64.zip'
           dest: /usr/local/bin
           remote_src: yes
-
-    - block:
-      - name: Installing gomplate 3.9.0
-        become: true
-        get_url:    
-          url: 'https://github.com/hairyhenderson/gomplate/releases/download/v3.9.0/gomplate_linux-amd64'
-          dest: /usr/local/bin/gomplate
-          mode: 755
-
-    - block:
-      - name: Installing Stern 1.11.0
-        become: true
-        get_url:    
-          url: 'https://github.com/wercker/stern/releases/download/1.11.0/stern_linux_amd64'
-          dest: /usr/local/bin/stern
-          mode: 755
-
-    - block:
-      - name: Install Google Cloud SDK Key
-        become: true
-        apt_key:
-          url: 'https://packages.cloud.google.com/apt/doc/apt-key.gpg'
-          state: present
-      - name: Install Google Cloud SDK Repository
-        become: true
-        apt_repository:
-          repo: 'deb [arch=amd64] https://packages.cloud.google.com/apt cloud-sdk main'
-          state: present
-          filename: google-cloud-sdk
-      - name: Install Google Cloud SDK
-        become: true
-        apt:
-          name: google-cloud-sdk
-
           
     - block:
       - name: Install Microsoft Key
@@ -238,39 +173,7 @@
         lineinfile:
           path: /home/{{ ansible_user_id }}/.zshrc
           regexp: '^plugins='
-          line: 'plugins=(git docker docker-compose)'
-        
-    - block:
-      - name: Installing Kubectl 1.22.0
-        become: true
-        get_url:    
-          url: 'https://dl.k8s.io/release/v1.22.0/bin/linux/amd64/kubectl'
-          dest: /usr/local/bin/kubectl
-          mode: 755
-      - name: Downloading Kubectx and Kubens 
-        become: true
-        git:
-          repo: 'https://github.com/ahmetb/kubectx'
-          dest: /opt/kubectx 
-      - name: Creating Symlink to kubectx and kubens 
-        become: true
-        file:
-          src: '/opt/kubectx/{{ item }}'
-          dest: '/usr/local/bin/{{ item }}'
-          state: link
-        with_items:
-          - kubectx
-          - kubens  
-      - name: Creating ZSH Completion  
-        file:
-          src: '/opt/kubectx/completion/{{ item }}'
-          dest: '/home/{{ ansible_user_id }}/.oh-my-zsh/completions/_{{ item }}'
-          state: link
-        with_items:
-          - kubectx.zsh
-          - kubens.zsh 
-          
-          
+          line: 'plugins=(git docker docker-compose)'         
 
     - block:
       - name: Install obsproject Ubuntu Repo

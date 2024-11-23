@@ -72,23 +72,6 @@
         executable: pip3
 
     - block:
-      - name: Install Google Key
-        become: true
-        apt_key: 
-          url: 'https://dl.google.com/linux/linux_signing_key.pub'
-          state: present
-      - name: Install Google Repository
-        become: true
-        apt_repository:
-          repo: 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main'
-          state: present
-          filename: google-chrome
-      - name: Install Google Chrome
-        become: true
-        apt:
-          name: google-chrome-stable
-
-    - block:
       - name: Installing Vagrant 2.2.18
         become: true
         unarchive:
@@ -287,31 +270,7 @@
           - kubectx.zsh
           - kubens.zsh 
           
-    - block:
-      - name: Adding Longsleep/Golang Backports Repository
-        become: true
-        apt_repository:
-          repo: 'ppa:longsleep/golang-backports'
-      - name: Install Golang 
-        become: true
-        apt:
-          name: golang-go
           
-# OPTIONAL:
-#  - PEEK - Lightweight Screen Recorder that can export as GIF
-#  - OBS-STUDIO - Screen Recorder and Casting Software 
-#  - Brave Browser - Secure web browser
-#  - Ulauncher - Application Launcher
-
-    - block:
-      - name: Adding Peek Repository
-        become: true
-        apt_repository:
-          repo: 'ppa:peek-developers/stable'
-      - name: Install Peek
-        become: true
-        apt:
-          name: peek
 
     - block:
       - name: Install obsproject Ubuntu Repo
@@ -340,12 +299,3 @@
         apt:
           name: brave-browser
 
-    - block:
-      - name: Adding Ulauncher Repository
-        become: true
-        apt_repository:
-          repo: 'ppa:agornostal/ulauncher'
-      - name: Install Ulauncher
-        become: true
-        apt:
-          name: ulauncher

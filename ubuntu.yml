@@ -33,13 +33,6 @@
           - jq
           - mtr
 
-
-    - name: Installing AWS CLI via pip3
-      become: true
-      pip:
-        name: awscli
-        executable: pip3
-
     - block:
       - name: Installing Vagrant 2.2.18
         become: true

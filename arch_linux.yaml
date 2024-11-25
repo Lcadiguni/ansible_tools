@@ -1,0 +1,110 @@
+---
+- name: Preparing Workstation on Arch Linux
+  hosts: localhost
+  connection: local
+  become: true
+  tasks:
+
+    - name: Installing essential applications
+      pacman:
+        name:
+          - vim
+          - htop
+          - curl
+          - wget
+          - ncdu
+          - tree
+          - make
+          - git
+          - bash-completion
+          - zsh
+          - flameshot
+          - tilix
+          - virtualbox
+          - mlocate
+          - krita
+          - jq
+          - mtr
+        state: present
+
+    - name: Installing OBS Studio
+      pacman:
+        name: obs-studio
+        state: present
+
+    - name: Installing Remmina
+      pacman:
+        name: remmina
+        state: present
+
+    - name: Installing Brave Browser
+      pacman:
+        name: brave-bin
+        state: present
+
+    - name: Installing Steam from official Arch repositories
+      pacman:
+        name: steam
+        state: present
+
+    - name: Installing GIMP from official Arch repositories
+      pacman:
+        name: gimp
+        state: present
+
+    - name: Installing dependencies for Steam (if necessary)
+      pacman:
+        name:
+          - lib32-glibc
+          - lib32-libx11
+          - lib32-libxcomposite
+          - lib32-libxrandr
+          - lib32-libxxf86vm
+          - lib32-alsa-plugins
+        state: present
+
+    - name: Enabling Steam service (if necessary)
+      systemd:
+        name: steam.service
+        enabled: true
+        state: started
+
+    - name: Installing Proton dependencies for Steam (if necessary)
+      pacman:
+        name: lib32-vulkan-icd-loader
+        state: present
+
+    - name: Installing Discord
+      pacman:
+        name: discord
+        state: present
+
+    - name: Install Visual Studio Code from AUR (optional)
+      aur:
+        name: visual-studio-code-bin
+        state: present
+
+    - name: Install Docker from official Arch repositories
+      pacman:
+        name:
+          - docker
+          - docker-compose
+        state: present
+
+    - name: Enable Docker service
+      systemd:
+        name: docker.service
+        enabled: true
+        state: started
+
+    - name: Add current user to docker group
+      user:
+        name: "{{ ansible_user_id }}"
+        groups: docker
+        append: yes
+
+    - name: Installing Terraform from AUR (optional)
+      aur:
+        name: terraform
+        state: present
+
